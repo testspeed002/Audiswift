@@ -1,0 +1,456 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		10CDE8C01E5794A98D6933AA /* AudiusAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 270EC6EE937F652935CD68B5 /* AudiusAPI.swift */; };
+		1102BB40C245FC6C0DE67970 /* VisualizerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCDC10E0DE49A6D824D3C20C /* VisualizerView.swift */; };
+		111455243E766B49B703EC38 /* TrackRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0B4339087DC274FCF91047D /* TrackRowView.swift */; };
+		2B3A23ACA8F1A0CF91E974F6 /* TabViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2932221FB519C6EDE9638A1B /* TabViews.swift */; };
+		506AB6DF377443C5BA6EDA3E /* AudiusAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68234B975DF9472F8E98CC77 /* AudiusAuth.swift */; };
+		558B9C3B9ECB1DBC61AC0807 /* PlaybackHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E55BB5C3B9AC66B7BFE3B8F /* PlaybackHistory.swift */; };
+		6C72C9DA9B8825EE827C40A9 /* TrackDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A549914FDB8FAD64BDE3CF4 /* TrackDetailView.swift */; };
+		7B6ED909B70837075FF5ED40 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3C99374838297DB197842941 /* Assets.xcassets */; };
+		7F3039AB41021871EF5E0EB7 /* PlayerBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB1C48F188AF297F76F9F965 /* PlayerBarView.swift */; };
+		8E0F9D4C401D0B2C0A7C2F8E /* LibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286AF8D5747EAA1AD2CA5C83 /* LibraryViewModel.swift */; };
+		91EDDC07AEC0B40EC25BD314 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72DDBF52B37CE7A112C94C24 /* main.swift */; };
+		AA82BE246F1F46504BE21641 /* CachedAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE09FF09A44DCC3F98DAB9C /* CachedAsyncImage.swift */; };
+		AEE5CBB6B81C75227354903B /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F866690772C02302BF476062 /* ThemeManager.swift */; };
+		B83F3AA1A9F9EECFD1593643 /* AudioPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6BE8ED22CD8BB59A0E3B7D /* AudioPlayerManager.swift */; };
+		C0F897125CAF493398C5111E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA0D40CE167F8324874555F /* ContentView.swift */; };
+		E6270BF17AE4CDB16E93DD1B /* FFTAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91589A5B171935DDD2A642D4 /* FFTAnalyzer.swift */; };
+		EBE6092F8B070317D05390F7 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B132C8CAB3D148E7AC399DB /* Models.swift */; };
+		ED7A09057B3946F9E48793A9 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ECDFC92E549D00DDB0D4D047 /* MediaPlayer.framework */; };
+		F0EEF4A3F9677D2B18EB319A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CF34C78EAF5CA2738748336 /* AppDelegate.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0B132C8CAB3D148E7AC399DB /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		1CF34C78EAF5CA2738748336 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		1E5BD0BF3260453EDBE8F9EB /* Audiswift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Audiswift.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		270EC6EE937F652935CD68B5 /* AudiusAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiusAPI.swift; sourceTree = "<group>"; };
+		286AF8D5747EAA1AD2CA5C83 /* LibraryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryViewModel.swift; sourceTree = "<group>"; };
+		2932221FB519C6EDE9638A1B /* TabViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabViews.swift; sourceTree = "<group>"; };
+		3C99374838297DB197842941 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5B6BE8ED22CD8BB59A0E3B7D /* AudioPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerManager.swift; sourceTree = "<group>"; };
+		68234B975DF9472F8E98CC77 /* AudiusAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiusAuth.swift; sourceTree = "<group>"; };
+		72DDBF52B37CE7A112C94C24 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		7A549914FDB8FAD64BDE3CF4 /* TrackDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackDetailView.swift; sourceTree = "<group>"; };
+		7E55BB5C3B9AC66B7BFE3B8F /* PlaybackHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackHistory.swift; sourceTree = "<group>"; };
+		91589A5B171935DDD2A642D4 /* FFTAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTAnalyzer.swift; sourceTree = "<group>"; };
+		956155605E38C484F51A7FB0 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
+		C0B4339087DC274FCF91047D /* TrackRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackRowView.swift; sourceTree = "<group>"; };
+		CEE09FF09A44DCC3F98DAB9C /* CachedAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedAsyncImage.swift; sourceTree = "<group>"; };
+		DDA0D40CE167F8324874555F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		EB1C48F188AF297F76F9F965 /* PlayerBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerBarView.swift; sourceTree = "<group>"; };
+		ECDFC92E549D00DDB0D4D047 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
+		F866690772C02302BF476062 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		FCDC10E0DE49A6D824D3C20C /* VisualizerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualizerView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A8ED4AE786C81327A16566C4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ED7A09057B3946F9E48793A9 /* MediaPlayer.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0899DB0ED45C9600E2B1A3FD /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3C99374838297DB197842941 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		1A8D035E549577EB9008CE05 = {
+			isa = PBXGroup;
+			children = (
+				D8BAA00A52F27A518319231F /* Config */,
+				0899DB0ED45C9600E2B1A3FD /* Resources */,
+				70350EFBC89D5894A1F2FE87 /* Sources */,
+				3353BDE56A3269D14EC148CE /* Frameworks */,
+				E8CE743C55024D44B522B122 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3353BDE56A3269D14EC148CE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				ECDFC92E549D00DDB0D4D047 /* MediaPlayer.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		48AC8F4BC45C3E5099F61669 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				0B132C8CAB3D148E7AC399DB /* Models.swift */,
+				7E55BB5C3B9AC66B7BFE3B8F /* PlaybackHistory.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		5DA26AA8DD12A3CF978D674B /* Player */ = {
+			isa = PBXGroup;
+			children = (
+				5B6BE8ED22CD8BB59A0E3B7D /* AudioPlayerManager.swift */,
+				91589A5B171935DDD2A642D4 /* FFTAnalyzer.swift */,
+			);
+			path = Player;
+			sourceTree = "<group>";
+		};
+		6E2929CC6696E330BE577429 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				270EC6EE937F652935CD68B5 /* AudiusAPI.swift */,
+				68234B975DF9472F8E98CC77 /* AudiusAuth.swift */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
+		70350EFBC89D5894A1F2FE87 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				6E2929CC6696E330BE577429 /* API */,
+				B34F27A2E385B8E45475EB6C /* App */,
+				48AC8F4BC45C3E5099F61669 /* Models */,
+				5DA26AA8DD12A3CF978D674B /* Player */,
+				9B78A870D7FCA4A49E5CF490 /* Views */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		9B78A870D7FCA4A49E5CF490 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				CEE09FF09A44DCC3F98DAB9C /* CachedAsyncImage.swift */,
+				DDA0D40CE167F8324874555F /* ContentView.swift */,
+				286AF8D5747EAA1AD2CA5C83 /* LibraryViewModel.swift */,
+				EB1C48F188AF297F76F9F965 /* PlayerBarView.swift */,
+				2932221FB519C6EDE9638A1B /* TabViews.swift */,
+				7A549914FDB8FAD64BDE3CF4 /* TrackDetailView.swift */,
+				C0B4339087DC274FCF91047D /* TrackRowView.swift */,
+				FCDC10E0DE49A6D824D3C20C /* VisualizerView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		B34F27A2E385B8E45475EB6C /* App */ = {
+			isa = PBXGroup;
+			children = (
+				1CF34C78EAF5CA2738748336 /* AppDelegate.swift */,
+				72DDBF52B37CE7A112C94C24 /* main.swift */,
+				F866690772C02302BF476062 /* ThemeManager.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		D8BAA00A52F27A518319231F /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				956155605E38C484F51A7FB0 /* Secrets.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		E8CE743C55024D44B522B122 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1E5BD0BF3260453EDBE8F9EB /* Audiswift.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3D08D9A96B9130C25D22F6AC /* Audiswift */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1AE2CB916A0EC6CC558DD21 /* Build configuration list for PBXNativeTarget "Audiswift" */;
+			buildPhases = (
+				53D661E6E542E4C663121DD8 /* Sources */,
+				47FBBC82AF6034967A18A630 /* Resources */,
+				A8ED4AE786C81327A16566C4 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Audiswift;
+			packageProductDependencies = (
+			);
+			productName = Audiswift;
+			productReference = 1E5BD0BF3260453EDBE8F9EB /* Audiswift.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8A0C9BFB603671F4D3D84A2A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					3D08D9A96B9130C25D22F6AC = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
+					};
+				};
+			};
+			buildConfigurationList = B43E1F17FCD1B464D890F639 /* Build configuration list for PBXProject "Audiswift" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 1A8D035E549577EB9008CE05;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = E8CE743C55024D44B522B122 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3D08D9A96B9130C25D22F6AC /* Audiswift */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		47FBBC82AF6034967A18A630 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7B6ED909B70837075FF5ED40 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		53D661E6E542E4C663121DD8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0EEF4A3F9677D2B18EB319A /* AppDelegate.swift in Sources */,
+				B83F3AA1A9F9EECFD1593643 /* AudioPlayerManager.swift in Sources */,
+				10CDE8C01E5794A98D6933AA /* AudiusAPI.swift in Sources */,
+				506AB6DF377443C5BA6EDA3E /* AudiusAuth.swift in Sources */,
+				AA82BE246F1F46504BE21641 /* CachedAsyncImage.swift in Sources */,
+				C0F897125CAF493398C5111E /* ContentView.swift in Sources */,
+				E6270BF17AE4CDB16E93DD1B /* FFTAnalyzer.swift in Sources */,
+				8E0F9D4C401D0B2C0A7C2F8E /* LibraryViewModel.swift in Sources */,
+				EBE6092F8B070317D05390F7 /* Models.swift in Sources */,
+				558B9C3B9ECB1DBC61AC0807 /* PlaybackHistory.swift in Sources */,
+				7F3039AB41021871EF5E0EB7 /* PlayerBarView.swift in Sources */,
+				2B3A23ACA8F1A0CF91E974F6 /* TabViews.swift in Sources */,
+				AEE5CBB6B81C75227354903B /* ThemeManager.swift in Sources */,
+				6C72C9DA9B8825EE827C40A9 /* TrackDetailView.swift in Sources */,
+				111455243E766B49B703EC38 /* TrackRowView.swift in Sources */,
+				1102BB40C245FC6C0DE67970 /* VisualizerView.swift in Sources */,
+				91EDDC07AEC0B40EC25BD314 /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0B415F4E5F1F6C23ED54480A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 956155605E38C484F51A7FB0 /* Secrets.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				AUDIUS_API_KEY = "$(AUDIUS_API_KEY)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = Audiswift;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		571871A37A660DD5673C0762 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Resources/Audiswift.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.openaudio.audiswift;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		6A7E35F77B84DB998EBC4B92 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 956155605E38C484F51A7FB0 /* Secrets.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				AUDIUS_API_KEY = "$(AUDIUS_API_KEY)";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = Audiswift;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		90EB40C6A75AD83CB0962680 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Resources/Audiswift.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.openaudio.audiswift;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A1AE2CB916A0EC6CC558DD21 /* Build configuration list for PBXNativeTarget "Audiswift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				571871A37A660DD5673C0762 /* Debug */,
+				90EB40C6A75AD83CB0962680 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B43E1F17FCD1B464D890F639 /* Build configuration list for PBXProject "Audiswift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6A7E35F77B84DB998EBC4B92 /* Debug */,
+				0B415F4E5F1F6C23ED54480A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8A0C9BFB603671F4D3D84A2A /* Project object */;
+}
