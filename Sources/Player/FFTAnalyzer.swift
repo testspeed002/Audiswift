@@ -18,6 +18,9 @@ final class FFTAnalyzer: ObservableObject {
     var sampleRate: Float = 44100.0
     var channelCount: UInt32 = 2
     
+    private var sampleBuffer = [Float]()
+    private let maxBufferLength: Int = 4096
+    
     init() {
         fftSetup = vDSP_create_fftsetup(vDSP_Length(log2(Float(fftSize))), FFTRadix(kFFTRadix2))
     }
@@ -81,48 +84,60 @@ final class FFTAnalyzer: ObservableObject {
         let buffers = UnsafeMutableAudioBufferListPointer(bufferList)
         guard let buffer = buffers.first, let data = buffer.mData else { return }
         
-        let n: Int = Int(fftSize)
-        guard frameCount >= n else { return }
-        
         let totalFrames = Int(frameCount)
-        
-        // Handle interleaved stereo or mono
         let isInterleaved = buffer.mNumberChannels > 1
         let floatData = data.assumingMemoryBound(to: Float.self)
         
         var stereoPts = [CGPoint]()
         stereoPts.reserveCapacity(totalFrames)
         
-        var fullPcmBuffer = [Float](unsafeUninitializedCapacity: totalFrames) { buf, initCount in
-            if isInterleaved {
-                for i in 0..<totalFrames {
-                    let left = floatData[i * 2]
-                    let right = floatData[i * 2 + 1]
-                    buf[i] = (left + right) * 0.5
-                    stereoPts.append(CGPoint(x: CGFloat(left), y: CGFloat(right)))
-                }
-            } else if buffers.count >= 2, let rightData = buffers[1].mData {
-                let rightFloatData = rightData.assumingMemoryBound(to: Float.self)
-                for i in 0..<totalFrames {
-                    let left = floatData[i]
-                    let right = rightFloatData[i]
-                    buf[i] = (left + right) * 0.5
-                    stereoPts.append(CGPoint(x: CGFloat(left), y: CGFloat(right)))
-                }
-            } else {
-                for i in 0..<totalFrames {
-                    let val = floatData[i]
-                    buf[i] = val
-                    stereoPts.append(CGPoint(x: CGFloat(val), y: CGFloat(val)))
-                }
+        var fullPcmBuffer = [Float](repeating: 0, count: totalFrames)
+        if isInterleaved {
+            for i in 0..<totalFrames {
+                let left = floatData[i * 2]
+                let right = floatData[i * 2 + 1]
+                fullPcmBuffer[i] = (left + right) * 0.5
+                stereoPts.append(CGPoint(x: CGFloat(left), y: CGFloat(right)))
             }
-            initCount = totalFrames
+        } else if buffers.count >= 2, let rightData = buffers[1].mData {
+            let rightFloatData = rightData.assumingMemoryBound(to: Float.self)
+            for i in 0..<totalFrames {
+                let left = floatData[i]
+                let right = rightFloatData[i]
+                fullPcmBuffer[i] = (left + right) * 0.5
+                stereoPts.append(CGPoint(x: CGFloat(left), y: CGFloat(right)))
+            }
+        } else {
+            for i in 0..<totalFrames {
+                let val = floatData[i]
+                fullPcmBuffer[i] = val
+                stereoPts.append(CGPoint(x: CGFloat(val), y: CGFloat(val)))
+            }
         }
+        
+        // Accumulate samples in our ring buffer
+        sampleBuffer.append(contentsOf: fullPcmBuffer)
+        if sampleBuffer.count > maxBufferLength {
+            sampleBuffer.removeFirst(sampleBuffer.count - maxBufferLength)
+        }
+        
         // Expose all frames to the UI for smooth continuous rendering
         let currentWaveform = fullPcmBuffer.map { CGFloat($0) }
         
-        // Only use the first `fftSize` samples for the actual FFT analysis
-        var pcmBuffer = Array(fullPcmBuffer.prefix(n))
+        // Only proceed with FFT if we have enough samples
+        let n: Int = Int(fftSize)
+        guard sampleBuffer.count >= n else {
+            // Still updating waveform and stereo for immediate feedback
+            DispatchQueue.main.async {
+                guard AudioPlayerManager.shared.isPlaying else { return }
+                self.waveformSamples = currentWaveform
+                self.stereoSamples = stereoPts
+            }
+            return
+        }
+        
+        // Take the latest `fftSize` samples for the actual FFT analysis
+        var pcmBuffer = Array(sampleBuffer.suffix(n))
         
         // Apply Hann window
         var window = [Float](repeating: 0, count: n)
