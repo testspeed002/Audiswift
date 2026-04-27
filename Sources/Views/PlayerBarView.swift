@@ -13,78 +13,97 @@ struct PlayerBarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // ── Enhanced Progress scrubber with hover preview ─────────
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    // Background track
-                    Rectangle()
-                        .fill(Color.secondary.opacity(0.3))
-                        .frame(height: 4)
+            // ── Enhanced Progress scrubber with hover preview + inline time labels ─
+            HStack(spacing: 8) {
+                Text(formatTime(playerManager.currentTime))
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .frame(width: 40, alignment: .trailing)
+                    .accessibilityLabel("Current time \(formatTime(playerManager.currentTime))")
 
-                    // Buffered progress (if available)
-                    Rectangle()
-                        .fill(Color.secondary.opacity(0.5))
-                        .frame(width: geometry.size.width * bufferedProgress, height: 4)
-
-                    // Current progress
-                    Rectangle()
-                        .fill(themeManager.currentTheme.accentColor)
-                        .frame(width: geometry.size.width * progress, height: 4)
-
-                    // Draggable thumb (only visible when playing or hovering)
-                    Circle()
-                        .fill(themeManager.currentTheme.accentColor)
-                        .frame(width: isHovering || playerManager.isPlaying ? 12 : 0, height: isHovering || playerManager.isPlaying ? 12 : 0)
-                        .position(x: geometry.size.width * progress, y: 2)
-                        .shadow(radius: 2)
-                        .animation(.easeInOut(duration: 0.1), value: isHovering)
-                }
-                .frame(height: 4)
-                .cornerRadius(2)
-                // Invisible tall layer for a generous hit area
-                .contentShape(Rectangle().size(CGSize(width: geometry.size.width, height: 28)))
-                .gesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { value in
-                            let p = max(0, min(1, value.location.x / geometry.size.width))
-                            playerManager.seek(to: p * playerManager.duration)
-                        }
-                )
-                .onContinuousHover { phase in
-                    switch phase {
-                    case .active(let location):
-                        isHovering = true
-                        hoverLocation = location.x
-                    case .ended:
-                        isHovering = false
-                        hoverLocation = 0
-                    }
-                }
-                .background(
-                    GeometryReader { geo in
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        // Spacer that fills the GeometryReader so child rectangles can vertically center
                         Color.clear
-                            .onAppear {
-                                containerWidth = geo.size.width
-                            }
-                            .onChange(of: geo.size.width) {
-                                containerWidth = geo.size.width
-                            }
+
+                        // Background track
+                        Rectangle()
+                            .fill(Color.secondary.opacity(0.3))
+                            .frame(height: 4)
+                            .cornerRadius(2)
+
+                        // Buffered progress (if available)
+                        Rectangle()
+                            .fill(Color.secondary.opacity(0.5))
+                            .frame(width: geometry.size.width * bufferedProgress, height: 4)
+                            .cornerRadius(2)
+
+                        // Current progress
+                        Rectangle()
+                            .fill(themeManager.currentTheme.accentColor)
+                            .frame(width: geometry.size.width * progress, height: 4)
+                            .cornerRadius(2)
+
+                        // Draggable thumb (only visible when playing or hovering)
+                        Circle()
+                            .fill(themeManager.currentTheme.accentColor)
+                            .frame(width: isHovering || playerManager.isPlaying ? 12 : 0, height: isHovering || playerManager.isPlaying ? 12 : 0)
+                            .position(x: geometry.size.width * progress, y: geometry.size.height / 2)
+                            .shadow(radius: 2)
+                            .animation(.easeInOut(duration: 0.1), value: isHovering)
                     }
-                )
-                // Hover time tooltip
-                .overlay(
-                    hoverTimePreview
-                        .opacity(isHovering ? 1 : 0)
-                        .animation(.easeInOut(duration: 0.15), value: isHovering),
-                    alignment: .top
-                )
+                    // Invisible tall layer for a generous hit area
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { value in
+                                let p = max(0, min(1, value.location.x / geometry.size.width))
+                                playerManager.seek(to: p * playerManager.duration)
+                            }
+                    )
+                    .onContinuousHover { phase in
+                        switch phase {
+                        case .active(let location):
+                            isHovering = true
+                            hoverLocation = location.x
+                        case .ended:
+                            isHovering = false
+                            hoverLocation = 0
+                        }
+                    }
+                    .background(
+                        GeometryReader { geo in
+                            Color.clear
+                                .onAppear {
+                                    containerWidth = geo.size.width
+                                }
+                                .onChange(of: geo.size.width) {
+                                    containerWidth = geo.size.width
+                                }
+                        }
+                    )
+                    // Hover time tooltip
+                    .overlay(
+                        hoverTimePreview
+                            .opacity(isHovering ? 1 : 0)
+                            .animation(.easeInOut(duration: 0.15), value: isHovering),
+                        alignment: .top
+                    )
+                }
+                .frame(height: 20)
+
+                Text(formatTime(playerManager.duration))
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .frame(width: 40, alignment: .leading)
+                    .accessibilityLabel("Duration \(formatTime(playerManager.duration))")
             }
-            .frame(height: 28)
-            .padding(.horizontal)
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
 
             // ── Main controls row ──────────────────────────────────────
             HStack(spacing: 20) {
-                // Track info with accessibility
+                // Track info with accessibility (left column - equal flexible width)
                 HStack(spacing: 12) {
                     if let track = playerManager.currentTrack {
                         Button {
@@ -159,104 +178,80 @@ struct PlayerBarView: View {
                             .accessibilityLabel("No track currently playing")
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-                Spacer()
+                // Transport controls with accessibility (center column - natural width)
+                HStack(spacing: 20) {
+                    // Shuffle
+                    Button { playerManager.toggleShuffle() } label: {
+                        Image(systemName: "shuffle")
+                            .font(.caption)
+                            .foregroundColor(playerManager.shuffleEnabled ? themeManager.currentTheme.accentColor : .secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Shuffle")
+                    .accessibilityValue(playerManager.shuffleEnabled ? "On" : "Off")
+                    .help("Toggle shuffle")
 
-                // Transport controls with accessibility
-                VStack(spacing: 2) {
-                    HStack(spacing: 20) {
-                        // Shuffle
-                        Button { playerManager.toggleShuffle() } label: {
-                            Image(systemName: "shuffle")
-                                .font(.caption)
-                                .foregroundColor(playerManager.shuffleEnabled ? themeManager.currentTheme.accentColor : .secondary)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Shuffle")
-                        .accessibilityValue(playerManager.shuffleEnabled ? "On" : "Off")
-                        .help("Toggle shuffle")
+                    // Previous
+                    Button { playerManager.playPrevious() } label: {
+                        Image(systemName: "backward.fill").font(.title3)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundColor(.primary)
+                    .accessibilityLabel("Previous track")
+                    .keyboardShortcut(.leftArrow, modifiers: [.command])
+                    .help("Previous track (⌘←)")
 
-                        // Previous
-                        Button { playerManager.playPrevious() } label: {
-                            Image(systemName: "backward.fill").font(.title3)
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundColor(.primary)
-                        .accessibilityLabel("Previous track")
-                        .keyboardShortcut(.leftArrow, modifiers: [.command])
-                        .help("Previous track (⌘←)")
-
-                        // Play / Pause with buffering ring
-                        Button { playerManager.togglePlayPause() } label: {
-                            ZStack {
-                                if playerManager.isBuffering {
-                                    Circle()
-                                        .trim(from: 0, to: 0.7)
-                                        .stroke(themeManager.currentTheme.accentColor, lineWidth: 2)
-                                        .frame(width: 38, height: 38)
-                                        .rotationEffect(Angle(degrees: isBufferingSpin ? 360 : 0))
-                                        .onAppear {
-                                            withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
-                                                isBufferingSpin = true
-                                            }
+                    // Play / Pause with buffering ring
+                    Button { playerManager.togglePlayPause() } label: {
+                        ZStack {
+                            if playerManager.isBuffering {
+                                Circle()
+                                    .trim(from: 0, to: 0.7)
+                                    .stroke(themeManager.currentTheme.accentColor, lineWidth: 2)
+                                    .frame(width: 38, height: 38)
+                                    .rotationEffect(Angle(degrees: isBufferingSpin ? 360 : 0))
+                                    .onAppear {
+                                        withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
+                                            isBufferingSpin = true
                                         }
-                                }
-                                Image(systemName: playerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                                    .font(.system(size: 32))
-                                    .opacity(playerManager.isBuffering ? 0.4 : 1.0)
+                                    }
                             }
+                            Image(systemName: playerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                                .font(.system(size: 32))
+                                .opacity(playerManager.isBuffering ? 0.4 : 1.0)
                         }
-                        .buttonStyle(.plain)
-                        .foregroundColor(.primary)
-                        .accessibilityLabel(playerManager.isPlaying ? "Pause" : "Play")
-                        .keyboardShortcut(.space, modifiers: [])
-                        .help("Play/Pause (Space)")
-
-                        // Next
-                        Button { playerManager.playNext() } label: {
-                            Image(systemName: "forward.fill").font(.title3)
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundColor(.primary)
-                        .accessibilityLabel("Next track")
-                        .keyboardShortcut(.rightArrow, modifiers: [.command])
-                        .help("Next track (⌘→)")
-
-                        // Repeat
-                        Button { playerManager.cycleRepeat() } label: {
-                            Image(systemName: repeatIcon)
-                                .font(.caption)
-                                .foregroundColor(playerManager.repeatMode == .off ? .secondary : themeManager.currentTheme.accentColor)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Repeat")
-                        .accessibilityValue(repeatModeDescription)
-                        .help("Cycle repeat mode: \(repeatModeDescription)")
                     }
+                    .buttonStyle(.plain)
+                    .foregroundColor(.primary)
+                    .accessibilityLabel(playerManager.isPlaying ? "Pause" : "Play")
+                    .keyboardShortcut(.space, modifiers: [])
+                    .help("Play/Pause (Space)")
 
-                    // Time display with accessibility
-                    HStack(spacing: 8) {
-                        Text(formatTime(playerManager.currentTime))
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                            .frame(width: 40, alignment: .trailing)
-                            .accessibilityLabel("Current time \(formatTime(playerManager.currentTime))")
-                            
-                        Text("/")
-                            .font(.caption2)
-                            .foregroundColor(.secondary.opacity(0.5))
-                            
-                        Text(formatTime(playerManager.duration))
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                            .frame(width: 40, alignment: .leading)
-                            .accessibilityLabel("Duration \(formatTime(playerManager.duration))")
+                    // Next
+                    Button { playerManager.playNext() } label: {
+                        Image(systemName: "forward.fill").font(.title3)
                     }
+                    .buttonStyle(.plain)
+                    .foregroundColor(.primary)
+                    .accessibilityLabel("Next track")
+                    .keyboardShortcut(.rightArrow, modifiers: [.command])
+                    .help("Next track (⌘→)")
+
+                    // Repeat
+                    Button { playerManager.cycleRepeat() } label: {
+                        Image(systemName: repeatIcon)
+                            .font(.caption)
+                            .foregroundColor(playerManager.repeatMode == .off ? .secondary : themeManager.currentTheme.accentColor)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Repeat")
+                    .accessibilityValue(repeatModeDescription)
+                    .help("Cycle repeat mode: \(repeatModeDescription)")
                 }
 
-                Spacer()
-
-                // Volume with accessibility
+                // Volume with accessibility (right column - equal flexible width)
                 HStack(spacing: 8) {
                     Image(systemName: volumeIcon)
                         .foregroundColor(.secondary)
@@ -273,12 +268,12 @@ struct PlayerBarView: View {
                     .accessibilityValue("\(Int(playerManager.volume * 100)) percent")
                     .help("Volume (⌘↑ / ⌘↓)")
                 }
-                .frame(width: 130, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: .trailing)
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, 8)
+            .padding(.vertical, 10)
         }
-        .frame(height: 80)
+        .frame(height: 96)
         .background(
             ZStack {
                 // Base warm-tinted glass
