@@ -26,7 +26,7 @@ class LibraryViewModel: ObservableObject {
         case search = "Search"
         case library = "Library"
         case trending = "Trending"
-        case nowPlaying = "Now Playing"
+        case nowPlaying = "Visualizer"
     }
 
     enum ViewMode: String, CaseIterable {
@@ -67,12 +67,50 @@ class LibraryViewModel: ObservableObject {
         await loadTrending()
     }
 
+    /// Maps a Browse Genres card label to the canonical Audius API genre slug
+    /// (the value the trending endpoint accepts). When `search(query:)` sees a
+    /// query exactly matching one of these labels, it routes to the
+    /// genre-tag-filtered trending endpoint instead of a text search — so
+    /// tapping "Hip-Hop" shows tracks tagged Hip-Hop/Rap, not tracks whose
+    /// title/artist contain the word "Hip-Hop".
+    static let genreLabelToSlug: [String: String] = [
+        "Electronic": "Electronic",
+        "Hip-Hop":    "Hip-Hop/Rap",
+        "Pop":        "Pop",
+        "R&B/Soul":   "R&B/Soul",
+        "Rock":       "Rock",
+        "Lofi":       "Lo-Fi",
+        "House":      "House",
+        "Techno":     "Techno"
+    ]
+
     func search(query: String) {
         searchTask?.cancel()
 
         guard !query.isEmpty else {
             searchResults = []
             isSearching = false
+            return
+        }
+
+        // If the query matches a Browse Genres card label, fetch tracks whose
+        // genre TAG matches, rather than running a text search. This gives the
+        // user genre-tag browsing from a single tap.
+        if let slug = Self.genreLabelToSlug[query] {
+            isSearching = true
+            searchTask = Task {
+                guard !Task.isCancelled else { return }
+                do {
+                    searchResults = try await AudiusAPI.getTrending(time: "month", genre: slug)
+                } catch {
+                    if !Task.isCancelled,
+                       !(error is CancellationError),
+                       (error as NSError).code != NSURLErrorCancelled {
+                        self.error = error.localizedDescription
+                    }
+                }
+                isSearching = false
+            }
             return
         }
 

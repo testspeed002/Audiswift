@@ -10,14 +10,17 @@
 		10CDE8C01E5794A98D6933AA /* AudiusAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 270EC6EE937F652935CD68B5 /* AudiusAPI.swift */; };
 		1102BB40C245FC6C0DE67970 /* VisualizerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCDC10E0DE49A6D824D3C20C /* VisualizerView.swift */; };
 		111455243E766B49B703EC38 /* TrackRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0B4339087DC274FCF91047D /* TrackRowView.swift */; };
+		298C9351EC94EFEE9585E0F6 /* AtmosphericVisualizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C9AFACC8B0C04882345407B /* AtmosphericVisualizer.swift */; };
 		2B3A23ACA8F1A0CF91E974F6 /* TabViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2932221FB519C6EDE9638A1B /* TabViews.swift */; };
 		506AB6DF377443C5BA6EDA3E /* AudiusAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68234B975DF9472F8E98CC77 /* AudiusAuth.swift */; };
 		558B9C3B9ECB1DBC61AC0807 /* PlaybackHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E55BB5C3B9AC66B7BFE3B8F /* PlaybackHistory.swift */; };
 		6C72C9DA9B8825EE827C40A9 /* TrackDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A549914FDB8FAD64BDE3CF4 /* TrackDetailView.swift */; };
+		7A15DC141166CFE02772D731 /* UpNextPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD1EB5EE2085B0A43D984A28 /* UpNextPopover.swift */; };
 		7B6ED909B70837075FF5ED40 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3C99374838297DB197842941 /* Assets.xcassets */; };
 		7F3039AB41021871EF5E0EB7 /* PlayerBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB1C48F188AF297F76F9F965 /* PlayerBarView.swift */; };
 		8E0F9D4C401D0B2C0A7C2F8E /* LibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286AF8D5747EAA1AD2CA5C83 /* LibraryViewModel.swift */; };
 		91EDDC07AEC0B40EC25BD314 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72DDBF52B37CE7A112C94C24 /* main.swift */; };
+		A57997503E3A8508895B0557 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8254DE1C65DF7EBB3D99870B /* PreferencesView.swift */; };
 		AA82BE246F1F46504BE21641 /* CachedAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE09FF09A44DCC3F98DAB9C /* CachedAsyncImage.swift */; };
 		AEE5CBB6B81C75227354903B /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F866690772C02302BF476062 /* ThemeManager.swift */; };
 		B83F3AA1A9F9EECFD1593643 /* AudioPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B6BE8ED22CD8BB59A0E3B7D /* AudioPlayerManager.swift */; };
@@ -40,10 +43,13 @@
 		68234B975DF9472F8E98CC77 /* AudiusAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudiusAuth.swift; sourceTree = "<group>"; };
 		72DDBF52B37CE7A112C94C24 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		7A549914FDB8FAD64BDE3CF4 /* TrackDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackDetailView.swift; sourceTree = "<group>"; };
+		7C9AFACC8B0C04882345407B /* AtmosphericVisualizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtmosphericVisualizer.swift; sourceTree = "<group>"; };
 		7E55BB5C3B9AC66B7BFE3B8F /* PlaybackHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackHistory.swift; sourceTree = "<group>"; };
+		8254DE1C65DF7EBB3D99870B /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 		91589A5B171935DDD2A642D4 /* FFTAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFTAnalyzer.swift; sourceTree = "<group>"; };
 		956155605E38C484F51A7FB0 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		C0B4339087DC274FCF91047D /* TrackRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackRowView.swift; sourceTree = "<group>"; };
+		CD1EB5EE2085B0A43D984A28 /* UpNextPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpNextPopover.swift; sourceTree = "<group>"; };
 		CEE09FF09A44DCC3F98DAB9C /* CachedAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedAsyncImage.swift; sourceTree = "<group>"; };
 		DDA0D40CE167F8324874555F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		EB1C48F188AF297F76F9F965 /* PlayerBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerBarView.swift; sourceTree = "<group>"; };
@@ -133,13 +139,16 @@
 		9B78A870D7FCA4A49E5CF490 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				7C9AFACC8B0C04882345407B /* AtmosphericVisualizer.swift */,
 				CEE09FF09A44DCC3F98DAB9C /* CachedAsyncImage.swift */,
 				DDA0D40CE167F8324874555F /* ContentView.swift */,
 				286AF8D5747EAA1AD2CA5C83 /* LibraryViewModel.swift */,
 				EB1C48F188AF297F76F9F965 /* PlayerBarView.swift */,
+				8254DE1C65DF7EBB3D99870B /* PreferencesView.swift */,
 				2932221FB519C6EDE9638A1B /* TabViews.swift */,
 				7A549914FDB8FAD64BDE3CF4 /* TrackDetailView.swift */,
 				C0B4339087DC274FCF91047D /* TrackRowView.swift */,
+				CD1EB5EE2085B0A43D984A28 /* UpNextPopover.swift */,
 				FCDC10E0DE49A6D824D3C20C /* VisualizerView.swift */,
 			);
 			path = Views;
@@ -244,6 +253,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F0EEF4A3F9677D2B18EB319A /* AppDelegate.swift in Sources */,
+				298C9351EC94EFEE9585E0F6 /* AtmosphericVisualizer.swift in Sources */,
 				B83F3AA1A9F9EECFD1593643 /* AudioPlayerManager.swift in Sources */,
 				10CDE8C01E5794A98D6933AA /* AudiusAPI.swift in Sources */,
 				506AB6DF377443C5BA6EDA3E /* AudiusAuth.swift in Sources */,
@@ -254,10 +264,12 @@
 				EBE6092F8B070317D05390F7 /* Models.swift in Sources */,
 				558B9C3B9ECB1DBC61AC0807 /* PlaybackHistory.swift in Sources */,
 				7F3039AB41021871EF5E0EB7 /* PlayerBarView.swift in Sources */,
+				A57997503E3A8508895B0557 /* PreferencesView.swift in Sources */,
 				2B3A23ACA8F1A0CF91E974F6 /* TabViews.swift in Sources */,
 				AEE5CBB6B81C75227354903B /* ThemeManager.swift in Sources */,
 				6C72C9DA9B8825EE827C40A9 /* TrackDetailView.swift in Sources */,
 				111455243E766B49B703EC38 /* TrackRowView.swift in Sources */,
+				7A15DC141166CFE02772D731 /* UpNextPopover.swift in Sources */,
 				1102BB40C245FC6C0DE67970 /* VisualizerView.swift in Sources */,
 				91EDDC07AEC0B40EC25BD314 /* main.swift in Sources */,
 			);

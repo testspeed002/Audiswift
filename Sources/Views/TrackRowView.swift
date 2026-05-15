@@ -141,7 +141,7 @@ struct TrackRowView: View {
             RoundedRectangle(cornerRadius: 8)
                 .fill(
                     isCurrentTrack
-                        ? themeManager.currentTheme.accentColor.opacity(0.1)
+                        ? themeManager.currentTheme.accentColor.opacity(0.12)
                         : (isHovered ? themeManager.currentTheme.hoverColor : Color.clear)
                 )
         )
@@ -150,7 +150,7 @@ struct TrackRowView: View {
             if isCurrentTrack {
                 RoundedRectangle(cornerRadius: 2)
                     .fill(themeManager.currentTheme.accentColor)
-                    .frame(width: 3)
+                    .frame(width: 4)
                     .padding(.vertical, 4)
             }
         }
@@ -163,6 +163,8 @@ struct TrackRowView: View {
         .contextMenu {
             Button("Play") { playerManager.play(track: track, context: context) }
             Button("Play Next") { playerManager.insertNext(track: track) }
+            Button("Add to Queue") { playerManager.insertNext(track: track) } // Same as insertNext for now
+            Divider()
             Button("Copy Track Link") {
                 let pasteboard = NSPasteboard.general
                 pasteboard.clearContents()

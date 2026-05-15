@@ -3,6 +3,9 @@ import AppKit
 import AuthenticationServices
 import CryptoKit
 import Security
+import os.log
+
+private let oauthLog = Logger(subsystem: "com.openaudio.audiswift.oauth", category: "AudiusAuth")
 
 // MARK: - Keychain helper
 
@@ -64,7 +67,7 @@ enum Keychain {
 
 class WebAuthPresentationContextProvider: NSObject, ASWebAuthenticationPresentationContextProviding {
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        return NSApplication.shared.windows.first ?? ASPresentationAnchor()
+        return NSApp.keyWindow ?? NSApp.mainWindow ?? NSApp.windows.first { $0.isVisible } ?? NSWindow()
     }
 }
 
@@ -75,6 +78,16 @@ class AudiusAuth: NSObject, ObservableObject {
 
     @Published var isSignedIn: Bool = false
     @Published var currentUser: User?
+    @Published var lastAuthError: String?
+
+    private func setError(_ message: String) {
+        oauthLog.error("\(message, privacy: .public)")
+        if Thread.isMainThread {
+            self.lastAuthError = message
+        } else {
+            DispatchQueue.main.async { self.lastAuthError = message }
+        }
+    }
 
     func getAccessToken() -> String? {
         return Keychain.load(forKey: KeychainKey.accessToken)
@@ -84,7 +97,7 @@ class AudiusAuth: NSObject, ObservableObject {
     private var clientId: String {
         Bundle.main.object(forInfoDictionaryKey: "AudiusAPIKey") as? String ?? ""
     }
-    private let redirectUri = "audiswift://callback"
+    private let redirectUri = "audiswift://oauth"
 
     // PKCE state — stored temporarily during the auth flow
     private var pendingCodeVerifier: String?
@@ -133,12 +146,25 @@ class AudiusAuth: NSObject, ObservableObject {
     // MARK: - Sign in
 
     func signIn() {
+        // Clear any previous error from the UI banner.
+        DispatchQueue.main.async { self.lastAuthError = nil }
+
+        guard !clientId.isEmpty else {
+            setError("Sign-in failed: AudiusAPIKey is missing from the build configuration.")
+            return
+        }
+
         let codeVerifier = generateRandomString(length: 64)
         let state        = generateRandomString(length: 32)
         pendingCodeVerifier = codeVerifier
         pendingState        = state
 
-        var components = URLComponents(string: "https://api.audius.co/v1/oauth/authorize")!
+        guard var components = URLComponents(string: "https://audius.co/oauth/auth") else {
+            pendingCodeVerifier = nil
+            pendingState = nil
+            setError("Sign-in failed: could not construct the Audius authorize URL.")
+            return
+        }
         components.queryItems = [
             URLQueryItem(name: "response_type",          value: "code"),
             URLQueryItem(name: "api_key",                value: clientId),
@@ -146,27 +172,46 @@ class AudiusAuth: NSObject, ObservableObject {
             URLQueryItem(name: "scope",                  value: "read"),
             URLQueryItem(name: "state",                  value: state),
             URLQueryItem(name: "code_challenge",         value: generateCodeChallenge(from: codeVerifier)),
-            URLQueryItem(name: "code_challenge_method",  value: "S256")
+            URLQueryItem(name: "code_challenge_method",  value: "S256"),
+            URLQueryItem(name: "app_name",               value: "Audiswift")
         ]
-        guard let url = components.url else { return }
-
-        let session = ASWebAuthenticationSession(url: url, callbackURLScheme: "audiswift") { [weak self] callbackURL, error in
-            guard let self else { return }
-            if let error = error {
-#if DEBUG
-                print("[Auth] Session error: \(error)")
-#endif
-                self.pendingCodeVerifier = nil
-                self.pendingState = nil
-                return
-            }
-            guard let callbackURL else { return }
-            self.handleCallback(url: callbackURL)
+        guard let url = components.url else {
+            pendingCodeVerifier = nil
+            pendingState = nil
+            setError("Sign-in failed: could not assemble the Audius authorize URL.")
+            return
         }
-        session.presentationContextProvider = presentationContextProvider
-        session.prefersEphemeralWebBrowserSession = false
-        session.start()
-        authSession = session
+
+        oauthLog.log("Opening Audius authorize URL in default browser: \(url, privacy: .public)")
+
+        // On macOS, ASWebAuthenticationSession behavior depends on the user's
+        // default browser and has been observed to silently no-op with
+        // third-party browsers (e.g. Helium) where the system can't round-trip
+        // the custom URL scheme back to the session. Instead, just open the
+        // URL in the default browser and let the OS route the
+        // `audiswift://oauth?code=…` redirect back to us via
+        // `application(_:open:)` → `AudiusAuth.handleIncomingURL`.
+        if !NSWorkspace.shared.open(url) {
+            setError("Sign-in failed: couldn't open the default browser. Set a default browser and try again.")
+            pendingCodeVerifier = nil
+            pendingState = nil
+        }
+    }
+
+    /// Entry point for OAuth callbacks delivered via the system URL scheme
+    /// (e.g. `application(_:open:)` → `audiswift://oauth?code=…&state=…`).
+    /// Used as a fallback in case `ASWebAuthenticationSession` doesn't
+    /// intercept the redirect itself.
+    func handleIncomingURL(_ url: URL) {
+        oauthLog.log("handleIncomingURL: \(url, privacy: .public)")
+        guard url.scheme?.lowercased() == "audiswift" else { return }
+        guard pendingState != nil else {
+            // No sign-in in progress — ignore stray deep links rather than
+            // racing into token exchange with no PKCE verifier.
+            oauthLog.log("Ignoring URL scheme delivery — no pending OAuth state.")
+            return
+        }
+        handleCallback(url: url)
     }
 
     // MARK: - Callback handling (with CSRF state check)
@@ -182,21 +227,26 @@ class AudiusAuth: NSObject, ObservableObject {
             if pair.count == 2 { params[String(pair[0])] = String(pair[1]) }
         }
 
+        // Surface OAuth-style error responses if Audius returned one.
+        if let oauthError = params["error"] {
+            let desc = params["error_description"] ?? oauthError
+            setError("Sign-in failed: \(desc)")
+            pendingCodeVerifier = nil
+            pendingState = nil
+            return
+        }
+
         // ── CSRF: verify state ──
         guard let returnedState = params["state"],
               returnedState == pendingState else {
-#if DEBUG
-            print("[Auth] State mismatch — possible CSRF. Aborting.")
-#endif
+            setError("Sign-in failed: OAuth state mismatch (possible CSRF). Please try again.")
             pendingCodeVerifier = nil
             pendingState = nil
             return
         }
 
         guard let code = params["code"] else {
-#if DEBUG
-            print("[Auth] No authorization code in callback.")
-#endif
+            setError("Sign-in failed: no authorization code in Audius callback.")
             return
         }
 
@@ -229,17 +279,15 @@ class AudiusAuth: NSObject, ObservableObject {
             let (data, response) = try await URLSession.shared.data(for: request)
 
             if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
-#if DEBUG
-                print("[Auth] Token exchange failed (\(http.statusCode)): \(String(data: data, encoding: .utf8) ?? "")")
-#endif
+                let bodyStr = String(data: data, encoding: .utf8) ?? ""
+                setError("Token exchange failed (HTTP \(http.statusCode)): \(bodyStr)")
                 return
             }
 
             guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let token = json["access_token"] as? String else {
-#if DEBUG
-                print("[Auth] Unexpected token response")
-#endif
+                let preview = String(data: data, encoding: .utf8)?.prefix(200) ?? ""
+                setError("Token exchange returned an unexpected response: \(preview)")
                 return
             }
 
@@ -251,12 +299,11 @@ class AudiusAuth: NSObject, ObservableObject {
 
             await MainActor.run {
                 self.isSignedIn  = true
+                self.lastAuthError = nil
             }
             await fetchCurrentUser()
         } catch {
-#if DEBUG
-            print("[Auth] Token exchange error: \(error)")
-#endif
+            setError("Token exchange error: \(error.localizedDescription)")
         }
     }
 
@@ -304,9 +351,7 @@ class AudiusAuth: NSObject, ObservableObject {
             let user = try await AudiusAPI.getMe()
             await MainActor.run { self.currentUser = user }
         } catch {
-#if DEBUG
-            print("[Auth] Failed to fetch current user: \(error)")
-#endif
+            setError("Signed in, but fetching the Audius user profile failed: \(error.localizedDescription)")
         }
     }
 
@@ -344,7 +389,12 @@ class AudiusAuth: NSObject, ObservableObject {
     // MARK: - Manual token (dev/testing)
 
     func setManualToken(_ token: String) {
-        Keychain.save(token, forKey: KeychainKey.accessToken)
+        var cleanToken = token.trimmingCharacters(in: .whitespacesAndNewlines)
+        if cleanToken.lowercased().hasPrefix("bearer ") {
+            cleanToken = String(cleanToken.dropFirst(7)).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        
+        Keychain.save(cleanToken, forKey: KeychainKey.accessToken)
         isSignedIn  = true
         Task { await fetchCurrentUser() }
     }

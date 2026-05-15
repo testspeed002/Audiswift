@@ -140,11 +140,22 @@ struct TrendingView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header
-            HStack {
-                Text("Trending")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+            // ── Apple-Music–style page title row with view-mode toggle.
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Label("Trending", systemImage: "flame.fill")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(themeManager.currentTheme.accentColor, .primary)
+                        .labelStyle(.iconOnly)
+                        .font(.title)
+                        .opacity(0)
+                        .frame(height: 0) // hidden — purely accessibility hint
+                    Text("Trending")
+                        .font(.system(size: 36, weight: .heavy, design: .rounded))
+                    Text("What's hot on Audius right now")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
                 Spacer()
                 Picker("View", selection: $viewModel.viewMode) {
                     Image(systemName: "list.bullet").tag(LibraryViewModel.ViewMode.list)
@@ -153,47 +164,58 @@ struct TrendingView: View {
                 .pickerStyle(.segmented)
                 .frame(width: 100)
             }
-            .padding()
+            .padding(.horizontal, 24)
+            .padding(.top, 24)
+            .padding(.bottom, 16)
 
-            // Time filter
-            HStack {
-                Picker("Time", selection: $viewModel.trendingTimeFilter) {
-                    Text("This Week").tag("week")
-                    Text("This Month").tag("month")
-                    Text("All Time").tag("allTime")
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 300) // Keeps it from expanding too much
-                Spacer()
+            // ── Time filter — system segmented control, HIG-sized.
+            Picker("Time", selection: $viewModel.trendingTimeFilter) {
+                Text("This Week").tag("week")
+                Text("This Month").tag("month")
+                Text("All Time").tag("allTime")
             }
-            .padding(.horizontal)
-            .padding(.bottom, 8)
+            .pickerStyle(.segmented)
+            .frame(maxWidth: 360)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 12)
             .onChange(of: viewModel.trendingTimeFilter) { _, _ in
                 Task { await viewModel.applyTrendingFilters() }
             }
 
-            // Genre pills
+            // ── Genre pills as ultraThinMaterial chips. Active state uses
+            //    the accent capsule fill; inactive uses glass — gives a
+            //    clear primary-vs-secondary read at a glance (HIG: Selection).
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     ForEach(0..<genreOptions.count, id: \.self) { i in
                         let genre = genreOptions[i]
                         let label = genreLabels[i]
                         let selected = viewModel.trendingGenreFilter == genre
-                        Button(label) {
+                        Button {
                             viewModel.trendingGenreFilter = genre
                             Task { await viewModel.applyTrendingFilters() }
+                        } label: {
+                            Text(label)
+                                .font(.caption.weight(.semibold))
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 7)
+                                .foregroundStyle(selected ? .white : .primary)
+                                .background {
+                                    if selected {
+                                        Capsule().fill(themeManager.currentTheme.accentColor)
+                                    } else {
+                                        Capsule().fill(.ultraThinMaterial)
+                                    }
+                                }
+                                .overlay(
+                                    Capsule().strokeBorder(Color.white.opacity(selected ? 0 : 0.10), lineWidth: 0.5)
+                                )
                         }
                         .buttonStyle(.plain)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(selected ? themeManager.currentTheme.accentColor : Color.secondary.opacity(0.12))
-                        .foregroundColor(selected ? .white : .primary)
-                        .cornerRadius(16)
-                        .font(.caption)
                     }
                 }
-                .padding(.horizontal)
-                .padding(.bottom, 12)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 16)
             }
 
             // Content
@@ -218,7 +240,7 @@ struct TrendingView: View {
                         }
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 100)
+                    .padding(.bottom, 160)
                 }
                 .refreshable { await viewModel.loadTrending() }
             } else {
@@ -229,7 +251,7 @@ struct TrendingView: View {
                         }
                     }
                     .padding()
-                    .padding(.bottom, 100)
+                    .padding(.bottom, 160)
                 }
                 .refreshable { await viewModel.loadTrending() }
             }
@@ -254,37 +276,49 @@ struct SearchView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Glass search bar
+            // Page title
             HStack {
-                Image(systemName: "magnifyingglass").foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Search")
+                        .font(.system(size: 36, weight: .heavy, design: .rounded))
+                    Text("Find tracks, artists, and genres on Audius")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 24)
+            .padding(.bottom, 16)
+
+            // Glass search bar — ultraThinMaterial + capsule, HIG semantic shape.
+            HStack(spacing: 10) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                    .font(.body.weight(.medium))
                 TextField("Search songs, albums, artists", text: $searchText)
                     .textFieldStyle(.plain)
                     .onChange(of: searchText) { _, newValue in viewModel.search(query: newValue) }
-                
+
                 if !searchText.isEmpty {
                     Button(action: { searchText = "" }) {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundColor(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .help("Clear search")
                 }
-                
+
                 if viewModel.isSearching {
-                    ProgressView().scaleEffect(0.7)
+                    ProgressView().scaleEffect(0.6)
                 }
             }
-            .padding(14)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(themeManager.currentTheme.panelColor)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(themeManager.currentTheme.glassEdgeColor, lineWidth: 1)
-                    )
-            )
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
-            .padding(.bottom, 10)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(.ultraThinMaterial, in: Capsule())
+            .overlay(Capsule().strokeBorder(Color.white.opacity(0.08), lineWidth: 0.5))
+            .padding(.horizontal, 24)
+            .padding(.bottom, 12)
 
             if searchText.isEmpty {
                 ScrollView {
@@ -302,7 +336,7 @@ struct SearchView: View {
                         }
                         .padding(.horizontal, 20)
                     }
-                    .padding(.bottom, 100)
+                    .padding(.bottom, 160)
                 }
             } else if viewModel.isSearching && viewModel.searchResults.isEmpty {
                 // Shimmer placeholders for search results
@@ -338,7 +372,7 @@ struct SearchView: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
-                    .padding(.bottom, 100)
+                    .padding(.bottom, 160)
                 }
             }
         }
@@ -504,6 +538,14 @@ struct LibraryView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(themeManager.currentTheme.backgroundColor)
+            .alert("Sign-in failed",
+                   isPresented: Binding(
+                    get: { auth.lastAuthError != nil },
+                    set: { if !$0 { auth.lastAuthError = nil } })) {
+                Button("OK") { auth.lastAuthError = nil }
+            } message: {
+                Text(auth.lastAuthError ?? "")
+            }
         }
     }
 }
@@ -521,39 +563,101 @@ struct SignedInLibraryView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Text("Your Library").font(.title).fontWeight(.bold)
+            // Header — Apple-Music–style title + secondary Sign Out chip.
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Your Library")
+                        .font(.system(size: 36, weight: .heavy, design: .rounded))
+                    if let user = auth.currentUser {
+                        Text("@\(user.handle)")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                }
                 Spacer()
-                Button("Sign Out") { auth.signOut() }
-                    .foregroundColor(.secondary).buttonStyle(.plain)
+                Button {
+                    auth.signOut()
+                } label: {
+                    Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
+                        .font(.caption.weight(.semibold))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(.ultraThinMaterial, in: Capsule())
+                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.10), lineWidth: 0.5))
+                }
+                .buttonStyle(.plain)
+                .help("Sign out of Audius")
             }
-            .padding()
+            .padding(.horizontal, 24)
+            .padding(.top, 24)
+            .padding(.bottom, 8)
+
+            // Primary actions — Play / Shuffle on Liked Tracks. HIG: Primary Action.
+            HStack(spacing: 12) {
+                Button {
+                    if let first = likedTracks.first {
+                        playerManager.play(track: first, context: likedTracks)
+                    }
+                } label: {
+                    Label("Play Liked", systemImage: "play.fill")
+                        .font(.body.weight(.semibold))
+                        .frame(minWidth: 130)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 18)
+                        .background(themeManager.currentTheme.accentColor, in: Capsule())
+                        .foregroundStyle(.white)
+                }
+                .buttonStyle(.plain)
+                .disabled(likedTracks.isEmpty)
+                .opacity(likedTracks.isEmpty ? 0.4 : 1)
+
+                Button {
+                    guard !likedTracks.isEmpty else { return }
+                    let shuffled = likedTracks.shuffled()
+                    if let first = shuffled.first {
+                        playerManager.play(track: first, context: shuffled)
+                    }
+                } label: {
+                    Label("Shuffle", systemImage: "shuffle")
+                        .font(.body.weight(.semibold))
+                        .frame(minWidth: 110)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 18)
+                        .background(.ultraThinMaterial, in: Capsule())
+                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.12), lineWidth: 0.5))
+                        .foregroundStyle(.primary)
+                }
+                .buttonStyle(.plain)
+                .disabled(likedTracks.isEmpty)
+                .opacity(likedTracks.isEmpty ? 0.4 : 1)
+
+                Spacer()
+
+                VStack(alignment: .center, spacing: 2) {
+                    Text("\(likedTracks.count)").font(.title3.weight(.bold))
+                    Text("Liked").font(.caption2).foregroundColor(.secondary)
+                }
+                VStack(alignment: .center, spacing: 2) {
+                    Text("\(playlists.count)").font(.title3.weight(.bold))
+                    Text("Playlists").font(.caption2).foregroundColor(.secondary)
+                }
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 16)
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                VStack(alignment: .leading, spacing: 28) {
                     if isLoading {
                         HStack { Spacer(); ProgressView(); Spacer() }
                             .padding(.top, 60)
                     } else {
                         // ── Liked Tracks ─────────────────────────────────
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Label("Liked Tracks", systemImage: "heart.fill")
-                                    .font(.title2).fontWeight(.bold)
-                                    .foregroundStyle(themeManager.currentTheme.accentColor)
-                                Spacer()
-                                if !likedTracks.isEmpty {
-                                    Button {
-                                        playerManager.play(track: likedTracks[0], context: likedTracks)
-                                    } label: {
-                                        Label("Play All", systemImage: "play.fill")
-                                            .font(.caption).fontWeight(.medium)
-                                    }
-                                    .buttonStyle(.borderedProminent)
-                                    .tint(themeManager.currentTheme.accentColor)
-                                    .controlSize(.small)
-                                }
-                            }
+                        VStack(alignment: .leading, spacing: 10) {
+                            Label("Liked Tracks", systemImage: "heart.fill")
+                                .font(.title2.weight(.bold))
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(themeManager.currentTheme.accentColor, .primary)
+                                .padding(.horizontal, 24)
 
                             if let error = likedError {
                                 HStack(spacing: 8) {
@@ -561,46 +665,53 @@ struct SignedInLibraryView: View {
                                         .foregroundColor(.orange)
                                     Text(error).font(.caption).foregroundColor(.secondary)
                                 }
+                                .padding(.horizontal, 24)
                             } else if likedTracks.isEmpty {
                                 Text("No liked tracks yet.")
                                     .foregroundColor(.secondary).font(.subheadline)
+                                    .padding(.horizontal, 24)
                             } else {
                                 LazyVStack(spacing: 4) {
                                     ForEach(Array(likedTracks.enumerated()), id: \.element.id) { i, track in
                                         TrackRowView(track: track, index: i + 1, context: likedTracks)
                                     }
                                 }
+                                .padding(.horizontal, 16)
                             }
                         }
 
                         // ── Playlists ─────────────────────────────────────
                         VStack(alignment: .leading, spacing: 12) {
                             Label("Your Playlists", systemImage: "music.note.list")
-                                .font(.title2).fontWeight(.bold)
+                                .font(.title2.weight(.bold))
+                                .padding(.horizontal, 24)
 
                             if playlists.isEmpty {
-                                VStack(spacing: 8) {
+                                VStack(alignment: .leading, spacing: 4) {
                                     Text("No playlists found")
                                         .font(.subheadline).foregroundColor(.secondary)
                                     Text("Only playlists you've **created** on Audius appear here.")
                                         .font(.caption).foregroundColor(.secondary)
-                                        .multilineTextAlignment(.leading)
                                 }
+                                .padding(.horizontal, 24)
                             } else {
                                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 180), spacing: 20)], spacing: 20) {
                                     ForEach(playlists) { playlist in
                                         NavigationLink(value: playlist) {
-                                            VStack(alignment: .leading) {
+                                            VStack(alignment: .leading, spacing: 8) {
                                                 CachedAsyncImage(artwork: playlist.artwork, size: .medium) { image in
                                                     image.resizable().aspectRatio(contentMode: .fill)
                                                 } placeholder: {
-                                                    Rectangle().fill(Color.gray.opacity(0.3))
+                                                    RoundedRectangle(cornerRadius: 10)
+                                                        .fill(Color.gray.opacity(0.3))
                                                 }
                                                 .frame(width: 180, height: 180)
-                                                .cornerRadius(8)
+                                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                                .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
 
                                                 Text(playlist.name)
-                                                    .font(.subheadline).lineLimit(1)
+                                                    .font(.subheadline.weight(.medium))
+                                                    .lineLimit(1)
                                                     .foregroundColor(.primary)
                                                 if let count = playlist.trackCount {
                                                     Text("\(count) tracks")
@@ -611,10 +722,11 @@ struct SignedInLibraryView: View {
                                         .buttonStyle(.plain)
                                     }
                                 }
+                                .padding(.horizontal, 24)
                             }
                         }
 
-                        Spacer(minLength: 100)
+                        Spacer(minLength: 160)
                     }
                 }
                 .padding()

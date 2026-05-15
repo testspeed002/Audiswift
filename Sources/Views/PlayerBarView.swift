@@ -10,6 +10,8 @@ struct PlayerBarView: View {
     @State private var containerWidth: CGFloat = 0
     @State private var isInfoHovered = false
     @State private var isBufferingSpin = false
+    @State private var showingUpNext = false
+    @State private var showingSleepTimer = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -27,22 +29,20 @@ struct PlayerBarView: View {
                         Color.clear
 
                         // Background track
-                        Rectangle()
+                        Capsule()
                             .fill(Color.secondary.opacity(0.3))
+                            .frame(maxWidth: .infinity)
                             .frame(height: 4)
-                            .cornerRadius(2)
 
                         // Buffered progress (if available)
-                        Rectangle()
+                        Capsule()
                             .fill(Color.secondary.opacity(0.5))
                             .frame(width: geometry.size.width * bufferedProgress, height: 4)
-                            .cornerRadius(2)
 
                         // Current progress
-                        Rectangle()
+                        Capsule()
                             .fill(themeManager.currentTheme.accentColor)
                             .frame(width: geometry.size.width * progress, height: 4)
-                            .cornerRadius(2)
 
                         // Draggable thumb (only visible when playing or hovering)
                         Circle()
@@ -102,8 +102,8 @@ struct PlayerBarView: View {
             .padding(.top, 10)
 
             // ── Main controls row ──────────────────────────────────────
-            HStack(spacing: 20) {
-                // Track info with accessibility (left column - equal flexible width)
+            HStack(spacing: 0) {
+                // Track info (Left)
                 HStack(spacing: 12) {
                     if let track = playerManager.currentTrack {
                         Button {
@@ -115,202 +115,205 @@ struct PlayerBarView: View {
                                 } placeholder: {
                                     Rectangle().fill(Color.gray.opacity(0.2))
                                 }
-                                .frame(width: 44, height: 44)
+                                .frame(width: 48, height: 48)
                                 .cornerRadius(6)
-                                .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
+                                .shadow(color: .black.opacity(0.3), radius: 4, y: 2)
                                 .accessibilityHidden(true)
 
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(track.title)
                                         .font(.subheadline)
-                                        .fontWeight(.medium)
-                                        .lineLimit(1)
+                                        .fontWeight(.semibold)
+                                        .lineLimit(2)
+                                        .multilineTextAlignment(.leading)
+                                        .fixedSize(horizontal: false, vertical: true)
                                     if let user = track.user {
                                         Text(user.name)
-                                            .font(.caption)
+                                            .font(.caption2)
                                             .foregroundColor(.secondary)
                                             .lineLimit(1)
                                     }
                                 }
-                                .frame(width: 140, alignment: .leading)
+                                .frame(width: 200, alignment: .leading)
                             }
                         }
                         .buttonStyle(.plain)
-                        .accessibilityElement(children: .combine)
-                        .accessibilityLabel("\(track.title) by \(track.user?.name ?? "unknown artist")")
+                        .help(track.title)
                         
                         Button {
                             showingTrackDetail = true
                         } label: {
                             Image(systemName: "info.circle")
+                                .font(.system(size: 14))
                                 .foregroundColor(isInfoHovered ? themeManager.currentTheme.accentColor : .secondary)
                                 .frame(width: 28, height: 28)
-                                .background(isInfoHovered ? themeManager.currentTheme.accentColor.opacity(0.15) : Color.clear)
-                                .clipShape(Circle())
                         }
                         .buttonStyle(.plain)
-                        .onHover { hovering in
-                            withAnimation(.easeInOut(duration: 0.15)) {
-                                isInfoHovered = hovering
-                            }
-                        }
-                        .help("View Track Details")
-                        .sheet(isPresented: $showingTrackDetail) {
-                            NavigationStack {
-                                TrackDetailView(track: track, onClose: { showingTrackDetail = false })
-                                    .navigationDestination(for: User.self)     { user     in UserProfileView(user: user) }
-                                    .navigationDestination(for: Playlist.self) { playlist in PlaylistDetailView(playlist: playlist) }
-                                    .navigationDestination(for: Track.self)    { track    in TrackDetailView(track: track) }
-                            }
-                            .frame(width: 600, height: 500)
-                            .environmentObject(playerManager)
-                            .environmentObject(themeManager)
-                            .presentationBackground(themeManager.currentTheme.backgroundColor)
+                        .onHover { isInfoHovered = $0 }
+                        .help("Track Details")
+                        .popover(isPresented: $showingTrackDetail) {
+                            TrackDetailPopover(track: track)
                         }
                     } else {
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.2))
-                            .frame(width: 44, height: 44)
-                            .cornerRadius(6)
-                        Text("Not Playing")
-                            .foregroundColor(.secondary)
-                            .frame(width: 160, alignment: .leading)
-                            .accessibilityLabel("No track currently playing")
+                        HStack(spacing: 12) {
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.1))
+                                .frame(width: 48, height: 48)
+                                .cornerRadius(6)
+                            Text("Not Playing")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(width: 220, alignment: .leading)
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(width: 280, alignment: .leading)
 
-                // Transport controls with accessibility (center column - natural width)
-                HStack(spacing: 20) {
-                    // Shuffle
-                    Button { playerManager.toggleShuffle() } label: {
-                        Image(systemName: "shuffle")
-                            .font(.caption)
-                            .foregroundColor(playerManager.shuffleEnabled ? themeManager.currentTheme.accentColor : .secondary)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Shuffle")
-                    .accessibilityValue(playerManager.shuffleEnabled ? "On" : "Off")
-                    .help("Toggle shuffle")
+                Spacer()
 
-                    // Previous
-                    Button { playerManager.playPrevious() } label: {
-                        Image(systemName: "backward.fill").font(.title3)
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundColor(.primary)
-                    .accessibilityLabel("Previous track")
-                    .keyboardShortcut(.leftArrow, modifiers: [.command])
-                    .help("Previous track (⌘←)")
+                // Transport controls (Center)
+                VStack(spacing: 4) {
+                    HStack(spacing: 24) {
+                        Button { playerManager.toggleShuffle() } label: {
+                            Image(systemName: "shuffle")
+                                .font(.system(size: 14))
+                                .foregroundColor(playerManager.shuffleEnabled ? themeManager.currentTheme.accentColor : .secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Shuffle")
 
-                    // Play / Pause with buffering ring
-                    Button { playerManager.togglePlayPause() } label: {
-                        ZStack {
-                            if playerManager.isBuffering {
-                                Circle()
-                                    .trim(from: 0, to: 0.7)
-                                    .stroke(themeManager.currentTheme.accentColor, lineWidth: 2)
-                                    .frame(width: 38, height: 38)
-                                    .rotationEffect(Angle(degrees: isBufferingSpin ? 360 : 0))
-                                    .onAppear {
-                                        withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
-                                            isBufferingSpin = true
+                        Button { playerManager.playPrevious() } label: {
+                            Image(systemName: "backward.fill").font(.title3)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Previous")
+
+                        Button { playerManager.togglePlayPause() } label: {
+                            ZStack {
+                                if playerManager.isBuffering {
+                                    Circle()
+                                        .trim(from: 0, to: 0.7)
+                                        .stroke(themeManager.currentTheme.accentColor, lineWidth: 2)
+                                        .frame(width: 44, height: 44)
+                                        .rotationEffect(Angle(degrees: isBufferingSpin ? 360 : 0))
+                                        .onAppear {
+                                            withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
+                                                isBufferingSpin = true
+                                            }
                                         }
-                                    }
+                                }
+                                Image(systemName: playerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                                    .font(.system(size: 44))
+                                    .symbolRenderingMode(.hierarchical)
+                                    .foregroundStyle(themeManager.currentTheme.accentColor)
+                                    .opacity(playerManager.isBuffering ? 0.4 : 1.0)
                             }
-                            Image(systemName: playerManager.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                                .font(.system(size: 32))
-                                .opacity(playerManager.isBuffering ? 0.4 : 1.0)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Play/Pause")
+
+                        Button { playerManager.playNext() } label: {
+                            Image(systemName: "forward.fill").font(.title3)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Next")
+
+                        Button { playerManager.cycleRepeat() } label: {
+                            Image(systemName: playerManager.repeatMode.icon)
+                                .font(.system(size: 14))
+                                .foregroundColor(playerManager.repeatMode == .off ? .secondary : themeManager.currentTheme.accentColor)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Repeat")
+                    }
+                }
+                .frame(width: 320)
+
+                Spacer()
+
+                // Volume & Extra Features (Right)
+                HStack(spacing: 16) {
+                    // Sleep Timer Chip
+                    if playerManager.sleepTimerEndsAt != nil || playerManager.sleepAfterCurrentTrack {
+                        Button {
+                            showingSleepTimer = true
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "timer")
+                                    .font(.system(size: 10, weight: .bold))
+                                if let endsAt = playerManager.sleepTimerEndsAt {
+                                    Text(endsAt, style: .timer)
+                                        .font(.system(size: 10, weight: .bold, design: .monospaced))
+                                } else {
+                                    Text("Track")
+                                        .font(.system(size: 8, weight: .bold))
+                                }
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(themeManager.currentTheme.accentColor.opacity(0.15))
+                            .foregroundColor(themeManager.currentTheme.accentColor)
+                            .cornerRadius(12)
+                        }
+                        .buttonStyle(.plain)
+                        .popover(isPresented: $showingSleepTimer) {
+                            SleepTimerPopover()
+                        }
+                    } else {
+                        Button {
+                            showingSleepTimer = true
+                        } label: {
+                            Image(systemName: "timer")
+                                .font(.system(size: 14))
+                                .foregroundColor(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .popover(isPresented: $showingSleepTimer) {
+                            SleepTimerPopover()
                         }
                     }
-                    .buttonStyle(.plain)
-                    .foregroundColor(.primary)
-                    .accessibilityLabel(playerManager.isPlaying ? "Pause" : "Play")
-                    .keyboardShortcut(.space, modifiers: [])
-                    .help("Play/Pause (Space)")
 
-                    // Next
-                    Button { playerManager.playNext() } label: {
-                        Image(systemName: "forward.fill").font(.title3)
+                    // Up Next Button
+                    Button {
+                        showingUpNext.toggle()
+                    } label: {
+                        Image(systemName: "list.bullet.indent")
+                            .font(.system(size: 14))
+                            .foregroundColor(showingUpNext ? themeManager.currentTheme.accentColor : .secondary)
                     }
                     .buttonStyle(.plain)
-                    .foregroundColor(.primary)
-                    .accessibilityLabel("Next track")
-                    .keyboardShortcut(.rightArrow, modifiers: [.command])
-                    .help("Next track (⌘→)")
-
-                    // Repeat
-                    Button { playerManager.cycleRepeat() } label: {
-                        Image(systemName: repeatIcon)
-                            .font(.caption)
-                            .foregroundColor(playerManager.repeatMode == .off ? .secondary : themeManager.currentTheme.accentColor)
+                    .help("Up Next")
+                    .popover(isPresented: $showingUpNext, arrowEdge: .top) {
+                        UpNextPopover()
+                            .frame(width: 320, height: 400)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Repeat")
-                    .accessibilityValue(repeatModeDescription)
-                    .help("Cycle repeat mode: \(repeatModeDescription)")
-                }
 
-                // Volume with accessibility (right column - equal flexible width)
-                HStack(spacing: 8) {
-                    Image(systemName: volumeIcon)
-                        .foregroundColor(.secondary)
-                        .font(.caption)
-                        .frame(width: 16)
-                        .accessibilityHidden(true)
-
-                    Slider(value: Binding(
-                        get: { Double(playerManager.volume) },
-                        set: { playerManager.volume = Float($0) }
-                    ), in: 0...1)
-                    .frame(width: 90)
-                    .accessibilityLabel("Volume")
-                    .accessibilityValue("\(Int(playerManager.volume * 100)) percent")
-                    .help("Volume (⌘↑ / ⌘↓)")
+                    // Volume
+                    HStack(spacing: 8) {
+                        Image(systemName: volumeIcon)
+                            .foregroundColor(.secondary)
+                            .font(.system(size: 12))
+                            .frame(width: 16)
+                        
+                        Slider(value: Binding(
+                            get: { Double(playerManager.volume) },
+                            set: { playerManager.volume = Float($0) }
+                        ), in: 0...1)
+                        .frame(width: 80)
+                        .tint(themeManager.currentTheme.accentColor) // Use tint for modern SwiftUI
+                        .accentColor(themeManager.currentTheme.accentColor)
+                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(width: 280, alignment: .trailing)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 48)
+            .padding(.vertical, 12)
         }
-        .frame(height: 96)
-        .background(
-            ZStack {
-                // Base warm-tinted glass
-                Rectangle()
-                    .fill(themeManager.currentTheme.panelColor.opacity(0.85))
-                
-                // Frosted glass material
-                Rectangle()
-                    .fill(.ultraThinMaterial)
-                    .environment(\.colorScheme, .dark)
-                
-                // Subtle gradient tint from accent
-                LinearGradient(
-                    colors: [
-                        themeManager.currentTheme.accentColor.opacity(0.04),
-                        Color.clear
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            }
-        )
-        .overlay(alignment: .top) {
-            // Top separator with accent glow
-            Rectangle()
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            themeManager.currentTheme.accentColor.opacity(0.3),
-                            themeManager.currentTheme.glassEdgeColor
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .frame(height: 0.5)
-        }
+        .frame(height: 100)
+        // The frosted chrome now lives full-width at the window level
+        // (ContentView.playerBarChrome) so it spans past this view's
+        // maxWidth-1100 cap — no bare flanks beside the controls. Matches the
+        // LMA pattern.
     }
 
     // MARK: - Hover Time Preview
@@ -376,11 +379,174 @@ struct PlayerBarView: View {
     }
 
     private func formatTime(_ time: TimeInterval) -> String {
-        // Guard against invalid values
-        guard time.isFinite else { return "0:00" }
-        let m = max(0, Int(time) / 60)
-        let s = max(0, Int(time) % 60)
+        guard time.isFinite, time >= 0 else { return "0:00" }
+        let m = Int(time) / 60
+        let s = Int(time) % 60
         return String(format: "%d:%02d", m, s)
+    }
+}
+
+// MARK: - Subviews
+
+struct SleepTimerPopover: View {
+    @EnvironmentObject var playerManager: AudioPlayerManager
+    @EnvironmentObject var themeManager: ThemeManager
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Text("Sleep Timer")
+                .font(.headline)
+                .padding(.vertical, 12)
+            
+            Divider()
+            
+            ScrollView {
+                VStack(spacing: 4) {
+                    timerButton(label: "Off", minutes: nil)
+                    timerButton(label: "End of Track", minutes: 0)
+                    Divider().padding(.vertical, 4)
+                    timerButton(label: "5 Minutes", minutes: 5)
+                    timerButton(label: "10 Minutes", minutes: 10)
+                    timerButton(label: "15 Minutes", minutes: 15)
+                    timerButton(label: "30 Minutes", minutes: 30)
+                    timerButton(label: "45 Minutes", minutes: 45)
+                    timerButton(label: "1 Hour", minutes: 60)
+                }
+                .padding(8)
+            }
+        }
+        .frame(width: 200, height: 320)
+    }
+
+    private func timerButton(label: String, minutes: Int?) -> some View {
+        Button {
+            if let mins = minutes {
+                if mins == 0 {
+                    playerManager.setSleepAfterCurrentTrack(true)
+                } else {
+                    playerManager.setSleepTimer(minutes: mins)
+                }
+            } else {
+                playerManager.setSleepTimer(minutes: nil)
+            }
+            dismiss()
+        } label: {
+            HStack {
+                Text(label)
+                Spacer()
+                if let mins = minutes {
+                    if mins == 0 && playerManager.sleepAfterCurrentTrack {
+                        Image(systemName: "checkmark").font(.caption)
+                    } else if mins > 0 && playerManager.sleepTimerEndsAt != nil {
+                        // Check if this specific minute choice is active (rough check)
+                        // In practice, we just show a check if ANY timer is active.
+                    }
+                } else if playerManager.sleepTimerEndsAt == nil && !playerManager.sleepAfterCurrentTrack {
+                    Image(systemName: "checkmark").font(.caption)
+                }
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(Color.secondary.opacity(0.1))
+            .cornerRadius(6)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+struct TrackDetailPopover: View {
+    let track: Track
+    @EnvironmentObject var themeManager: ThemeManager
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // ── Header: larger artwork tile, full-name title, artist link
+            HStack(spacing: 14) {
+                CachedAsyncImage(artwork: track.artwork, size: .medium) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.gray.opacity(0.2))
+                        .overlay(Image(systemName: "music.note").foregroundColor(.secondary))
+                }
+                .frame(width: 76, height: 76)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(Color.white.opacity(0.10), lineWidth: 0.5))
+                .shadow(color: .black.opacity(0.35), radius: 6, y: 3)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(track.title)
+                        .font(.headline)
+                        .lineLimit(nil)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if let user = track.user {
+                        HStack(spacing: 4) {
+                            Text(user.name)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+                            if user.isVerified == true {
+                                Image(systemName: "checkmark.seal.fill")
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, themeManager.currentTheme.accentColor)
+                                    .font(.caption)
+                            }
+                        }
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+
+            Divider()
+
+            // ── Metadata grid
+            VStack(alignment: .leading, spacing: 8) {
+                if let genre = track.genre, !genre.isEmpty {
+                    detailRow(label: "Genre", value: genre)
+                }
+                if let mood = track.mood, !mood.isEmpty {
+                    detailRow(label: "Mood", value: mood)
+                }
+                detailRow(label: "Duration", value: track.formattedDuration)
+                if let plays = track.formattedPlayCount {
+                    detailRow(label: "Plays", value: plays)
+                }
+                if let released = track.releaseDate, !released.isEmpty {
+                    detailRow(label: "Released", value: String(released.prefix(10)))
+                }
+            }
+
+            if let tags = track.tags, !tags.isEmpty {
+                Divider()
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Tags")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.secondary)
+                    Text(tags)
+                        .font(.caption)
+                        .foregroundColor(.primary.opacity(0.85))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .textSelection(.enabled)
+                }
+            }
+        }
+        .padding(20)
+        .frame(width: 360)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func detailRow(label: String, value: String) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(label).font(.subheadline).foregroundColor(.secondary)
+            Spacer(minLength: 12)
+            Text(value)
+                .font(.subheadline.weight(.medium))
+                .multilineTextAlignment(.trailing)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 

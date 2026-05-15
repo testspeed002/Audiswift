@@ -1,5 +1,16 @@
 import Foundation
 
+class AuthRedirectDelegate: NSObject, URLSessionTaskDelegate {
+    func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
+        var redirectedRequest = request
+        if let originalRequest = task.originalRequest,
+           let authHeader = originalRequest.value(forHTTPHeaderField: "Authorization") {
+            redirectedRequest.setValue(authHeader, forHTTPHeaderField: "Authorization")
+        }
+        completionHandler(redirectedRequest)
+    }
+}
+
 struct AudiusAPI {
     static let baseURL = "https://api.audius.co/v1"
     static var apiKey: String? = Bundle.main.object(forInfoDictionaryKey: "AudiusAPIKey") as? String
@@ -31,8 +42,13 @@ struct AudiusAPI {
         request.httpMethod = "GET"
         request.timeoutInterval = 15
         headers().forEach { request.setValue($1, forHTTPHeaderField: $0) }
+        
+#if DEBUG
+        print("[API] Request: \(path) Headers: \(headers().keys)")
+#endif
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let session = URLSession(configuration: .default, delegate: AuthRedirectDelegate(), delegateQueue: nil)
+        let (data, response) = try await session.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw AudiusError.invalidResponse
@@ -53,7 +69,7 @@ struct AudiusAPI {
                 retryRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
                 retryRequest.setValue(apiKey, forHTTPHeaderField: "x-api-key")
             }
-            let (retryData, retryResponse) = try await URLSession.shared.data(for: retryRequest)
+            let (retryData, retryResponse) = try await session.data(for: retryRequest)
             guard let retryHttp = retryResponse as? HTTPURLResponse,
                   (200...299).contains(retryHttp.statusCode) else {
                 throw AudiusError.httpError(statusCode: (retryResponse as? HTTPURLResponse)?.statusCode ?? 401)

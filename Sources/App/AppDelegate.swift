@@ -2,8 +2,14 @@ import AppKit
 import SwiftUI
 import MediaPlayer
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var window: NSWindow?
+    private var preferencesWindow: NSWindow?
+
+    // Hard floor for the main window. Used by both the contentMinSize/minSize
+    // initial setup AND the windowWillResize delegate clamp, so neither tiling,
+    // un-tiling, nor restored autosaved frames can shrink the window past it.
+    private let windowFloor = NSSize(width: 480, height: 480)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let contentView = ContentView()
@@ -22,9 +28,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window?.titlebarAppearsTransparent = true
         window?.toolbarStyle = .unified
         window?.center()
-        window?.minSize = NSSize(width: 720, height: 480)
         window?.setFrameAutosaveName("AudiswiftMainWindow")
+        window?.isReleasedWhenClosed = false
         window?.contentView = NSHostingView(rootView: contentView)
+
+        // Enforce a 480×480 floor on the CONTENT area. With
+        // .fullSizeContentView the title bar overlays the content, so
+        // `minSize` alone isn't always enough — `contentMinSize` is what
+        // AppKit actually clamps the live-resize loop against. Set this
+        // AFTER the hosting view is in place so the hosting view's
+        // intrinsic content size can't shrink the window below it.
+        window?.contentMinSize = windowFloor
+        window?.minSize = windowFloor
+        // Become the window's delegate so `windowWillResize` can clamp
+        // tiled-untiled and programmatic resizes that bypass minSize.
+        window?.delegate = self
+        // If a previous session autosaved a smaller frame, bump it back up.
+        if let w = window, w.frame.size.width < windowFloor.width || w.frame.size.height < windowFloor.height {
+            var frame = w.frame
+            frame.size.width = max(frame.size.width, windowFloor.width)
+            frame.size.height = max(frame.size.height, windowFloor.height)
+            w.setFrame(frame, display: true, animate: false)
+        }
+
         window?.makeKeyAndOrderFront(nil)
 
         // Setup menu bar and keyboard shortcuts
@@ -37,7 +63,34 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return false
+    }
+
+    // Fallback path for OAuth callbacks delivered via the custom URL scheme
+    // (e.g. when ASWebAuthenticationSession doesn't intercept the redirect and
+    // macOS routes `audiswift://oauth?code=…` to the app directly).
+    func application(_ application: NSApplication, open urls: [URL]) {
+        for url in urls where url.scheme?.lowercased() == "audiswift" {
+            AudiusAuth.shared.handleIncomingURL(url)
+        }
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            window?.makeKeyAndOrderFront(nil)
+        }
         return true
+    }
+
+    // MARK: - NSWindowDelegate
+
+    /// Clamp every resize attempt (drag, tiling un-tile, programmatic) to the
+    /// 480×480 floor. `minSize`/`contentMinSize` alone don't catch the
+    /// "untiledFrame restored" path on macOS, which is how the window was
+    /// previously shrinking to ~87×52 after being tiled.
+    func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
+        NSSize(width: max(frameSize.width, windowFloor.width),
+               height: max(frameSize.height, windowFloor.height))
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -185,8 +238,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         AudioPlayerManager.shared.cycleRepeat()
     }
 
-    @objc private func showPreferences() {
-        // TODO: Show preferences window
-        print("Preferences not yet implemented")
+    @objc @MainActor func showPreferences() {
+        if let existing = preferencesWindow, existing.isVisible {
+            existing.makeKeyAndOrderFront(nil)
+            return
+        }
+
+        let prefs = PreferencesView()
+            .environmentObject(ThemeManager.shared)
+
+        let panel = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 500, height: 460),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        panel.title = "Preferences"
+        panel.center()
+        panel.isReleasedWhenClosed = false
+        panel.contentView = NSHostingView(rootView: prefs)
+        panel.makeKeyAndOrderFront(nil)
+        preferencesWindow = panel
     }
 }

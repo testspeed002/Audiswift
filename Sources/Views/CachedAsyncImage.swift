@@ -47,12 +47,11 @@ final class ArtworkLoader: ObservableObject {
         }
         urls += artwork?.mirrorUrls(for: size).compactMap { URL(string: $0) } ?? []
 
-        guard !urls.isEmpty else { return }
+        guard let primaryCacheKey = urls.first else { return }
 
         isLoading = true
         task = Task {
-            // Check cache first — defer assignment to avoid publishing during view update
-            if let cached = ImageCache.shared.image(for: urls[0]) {
+            if let cached = ImageCache.shared.image(for: primaryCacheKey) {
                 self.image = cached
                 self.isLoading = false
                 return
@@ -66,7 +65,7 @@ final class ArtworkLoader: ObservableObject {
                     return
                 }
                 if let loaded = await Self.fetch(url: url) {
-                    ImageCache.shared.store(loaded, for: urls[0])
+                    ImageCache.shared.store(loaded, for: primaryCacheKey)
                     self.image = loaded
                     self.isLoading = false
                     return
